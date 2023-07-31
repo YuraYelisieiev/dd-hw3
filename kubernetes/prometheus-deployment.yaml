@@ -1,0 +1,52 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: kompose convert -f compose.yaml -o kubernetes/
+    kompose.version: 1.30.0 (1f1fc202)
+  creationTimestamp: null
+  labels:
+    io.kompose.service: prometheus
+  name: prometheus
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: prometheus
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: kompose convert -f compose.yaml -o kubernetes/
+        kompose.version: 1.30.0 (1f1fc202)
+      creationTimestamp: null
+      labels:
+        io.kompose.network/hw-3-default: "true"
+        io.kompose.service: prometheus
+    spec:
+      containers:
+        - args:
+            - --config.file=/etc/prometheus/prometheus.yml
+          image: prom/prometheus
+          name: prometheus
+          ports:
+            - containerPort: 9090
+              hostPort: 9090
+              protocol: TCP
+          resources: {}
+          volumeMounts:
+            - mountPath: /etc/prometheus
+              name: prometheus-claim0
+            - mountPath: /prometheus
+              name: prom-data
+      restartPolicy: Always
+      volumes:
+        - name: prometheus-claim0
+          persistentVolumeClaim:
+            claimName: prometheus-claim0
+        - name: prom-data
+          persistentVolumeClaim:
+            claimName: prom-data
+status: {}
